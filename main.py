@@ -112,7 +112,7 @@ def extract_text():
         if not image_data:
             return jsonify({"error": "No Base64 image data provided"}), 400
 
-        ocr_api = API(api_key="K89122345988957")  
+        ocr_api = API()  
 
         extracted_text = ocr_api.ocr_base64(image_data)
 
