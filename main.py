@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, send_file
 from gtts import gTTS
 import google.generativeai as genai
 import tempfile
+import requests
 
 app = Flask(__name__)
 
@@ -126,4 +127,3 @@ def extract_text():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
-
