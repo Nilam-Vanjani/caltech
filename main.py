@@ -69,6 +69,61 @@ def text_to_speech():
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
+class API:
+    def _init_(
+        self,
+        endpoint="https://api.ocr.space/parse/image",
+        api_key="K89122345988957",  
+        language="eng",
+        **kwargs,
+    ):
+        self.endpoint = endpoint
+        self.payload = {
+            "isOverlayRequired": True,
+            "apikey": api_key,
+            "language": language,
+            "OCREngine": 2,
+            **kwargs,
+        }
+
+    def _parse(self, raw):
+        if type(raw) == str:
+            raise Exception(raw)
+        if raw["IsErroredOnProcessing"]:
+            raise Exception(raw["ErrorMessage"][0])
+        return raw["ParsedResults"][0]["ParsedText"]
+
+    def ocr_base64(self, base64image):
+        data = self.payload
+        data["base64Image"] = base64image
+        r = requests.post(
+            self.endpoint,
+            data=data,
+        )
+        return self._parse(r.json())
+
+
+@app.route("/extract_text", methods=["POST"])
+def extract_text():
+    try:
+        data = request.get_json()
+        image_data = data.get("image")
+        if not image_data:
+            return jsonify({"error": "No Base64 image data provided"}), 400
+
+        ocr_api = API(api_key="K89122345988957")  
+
+        extracted_text = ocr_api.ocr_base64(image_data)
+
+        if not extracted_text:
+            return jsonify({"error": "Could not extract text from the image"}), 400
+
+        return jsonify({"extracted_text": extracted_text})
+
+    except Exception as e:
+        print(f"Error occurred: {str(e)}")
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
 
